@@ -18,7 +18,7 @@ $Package = new TransportPackageWizard(array(
 				));
 
 /** Add files & directories to package */
-$Package->addDirectory('path/to/directory', "return MODX_CORE_PATH.'components/mypackagename/'");
+$Package->addDirectory('path/to/directory', "{assets_path}components/mypackagename/");
 
 /** Create a Category element */
 $myCategory = $Package->addCategory('My Category Name'); 
