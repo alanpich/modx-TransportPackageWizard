@@ -2,18 +2,17 @@
 define('DEFINE','DEFINE');
 require_once dirname(__FILE__).'/TransportPackageWizard_Category.class.php';
 
-
-
+// Transport Package Wizard Class
+//-------------------------------------------------------------------------------------------------
 class TransportPackageWizard {
 	
 private $startTime,$endTime,$buildTime;
 public $categories = array();
-
 public $pathShortcuts = array(
-	'{base_path}' => '".MODX_BASE_PATH."',
-	'{core_path}' => '".MODX_CORE_PATH."',
-	'{assets_path}' => '".MODX_ASSETS_PATH."'
-);
+		'{base_path}' => '".MODX_BASE_PATH."',
+		'{core_path}' => '".MODX_CORE_PATH."',
+		'{assets_path}' => '".MODX_ASSETS_PATH."'
+	);
 
 
 function __construct( $config ){
@@ -40,7 +39,7 @@ function __construct( $config ){
 	
 	
 // Run the builder
-///------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 public function build() {
 	
 		// ADD CATEGORIES 
@@ -71,7 +70,8 @@ public function addDirectory($source,$target){
 		$this->categories[PKG_NAME]->addDirectory($source,$target);
 	}//
 	
-	
+
+
 
 //-------------------------------------------------------------------------------------------------
 //---  P R I V A T E   M E T H O D S  -------------------------------------------------------------
@@ -95,6 +95,7 @@ private function _define_constants() {
 		};
 	}//
 
+
 // Start timer	
 //------------------------------------------------------------------------------------------------	
 private function _start_timer(){
@@ -103,6 +104,7 @@ private function _start_timer(){
 		set_time_limit(0);
 		echo '<html><head><meta charset="utf8" /></head><body><pre>';
 	}//
+	
 	
 // Stop Timer when complete
 //------------------------------------------------------------------------------------------------	
@@ -113,6 +115,7 @@ private function _stop_timer(){
 		$this->log("<strong>Package $this->pkg_name Built in {$totalTime}</strong>\n",'DONE');
 		echo '</pre></body></html>';
 	}//
+	
 	
 // Initialize Modx manager class
 //-------------------------------------------------------------------------------------------------
@@ -139,7 +142,8 @@ private function _register_namespace($NAMESPACE){
 	}//
 	
 	
-
+// Output to browser (todo - make able to run in shell/bash as CLI script)
+//-------------------------------------------------------------------------------------------------
 public function log($msg, $key='LOG',$color='#5F9EA0'){
 		if(!empty($key)){ $key = "[$key]"; };
 		$key = str_pad("$key",8);

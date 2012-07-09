@@ -33,11 +33,8 @@ function __construct( $name, $wizard ){
 	}//
 	
 
-public function add( $objects ){
-		$this->modCategory->addMany($objects);
-	}//
-	
-	
+// Add a snippet to this category	
+//-------------------------------------------------------------------------------------------------
 public function addSnippet( $name, $filePath, $description = '', $properties = array() ) {
 		if(!file_exists($filePath)){
 			$this->wizard->log("Skipping missing Snippet [$filePath]",'WARN','orange');
@@ -54,6 +51,9 @@ public function addSnippet( $name, $filePath, $description = '', $properties = a
 		$this->snippets[] = $snippet;
 	}//
 	
+	
+// Add a chunk to this category	
+//-------------------------------------------------------------------------------------------------
 public function addChunk($name, $filePath, $description='', $properties = array() ){
 		if(!file_exists($filePath)){
 			$this->wizard->log("Skipping missing Chunk [$filePath]",'WARN','orange');
@@ -69,8 +69,10 @@ public function addChunk($name, $filePath, $description='', $properties = array(
 		$chunk->setProperties($properties);
 		$this->chunks[] = $chunk;
 	}//
+
 	
-	
+// Add a directory to this category	 [ Use TransportPackageWizard::addDirectory() instead ]
+//-------------------------------------------------------------------------------------------------
 public function addDirectory($source,$target){
 		if(!is_dir($source)){
 			$this->wizard->log("Skipping missing Directory [$source",'WARN','orange');
@@ -79,9 +81,16 @@ public function addDirectory($source,$target){
 		$this->directories[] = array('source'=>$source,'target'=>$target);
 	}//
 	
+
 	
 	
+//-------------------------------------------------------------------------------------------------
+//---  D O N T   U S E   T H E S E   F U N C T I O N S   D I R E C T L Y  -------------------------
+//-------------------------------------------------------------------------------------------------
 	
+
+// Build the transport vehicle for this category
+//-------------------------------------------------------------------------------------------------
 public function build() {
 
 		$this->wizard->log("Adding category [$this->name] to package...",'ADD');
@@ -98,7 +107,10 @@ public function build() {
 		
 		$this->wizard->builder->putVehicle($this->vehicle);
 	}//
-	
+
+
+// Build Snippets for transport
+//-------------------------------------------------------------------------------------------------	
 private function _build_snippets(){
 		if(count($this->snippets)<1){return;};
 		$this->modCategory->addMany($this->snippets);
@@ -112,6 +124,8 @@ private function _build_snippets(){
 	}//
 
 
+// Build Chunks for transport
+//-------------------------------------------------------------------------------------------------	
 private function _build_chunks(){
 		if(count($this->chunks)<1){return;};
 		$this->modCategory->addMany($this->chunks);
@@ -125,6 +139,8 @@ private function _build_chunks(){
 	}//
 	
 	
+// Build Directories for transport
+//-------------------------------------------------------------------------------------------------	
 private function _build_directories(  ){
 		if(count($this->directories)<1){return;};
 		$this->wizard->log("  &#8212; Directories:",'');
@@ -147,10 +163,9 @@ private function _build_directories(  ){
 		};
 	}//
 
-
-
 	
-	
+// Helper Function - Get a file contents and strip out php tags
+//-------------------------------------------------------------------------------------------------	
 private function _get_file($filename){
 		$o = file_get_contents($filename);
 		$o = trim(str_replace(array('<?php','?>'),'',$o));
@@ -159,4 +174,3 @@ private function _get_file($filename){
 
 	
 };// end class TransportPackageWizard_Category
-
