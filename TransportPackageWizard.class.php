@@ -6,14 +6,16 @@ require_once dirname(__FILE__).'/TransportPackageWizard_Category.class.php';
 
 class TransportPackageWizard {
 	
-	
 private $startTime,$endTime,$buildTime;
-
-
 public $categories = array();
 
+public $pathShortcuts = array(
+	'{base_path}' => '".MODX_BASE_PATH."',
+	'{core_path}' => '".MODX_CORE_PATH."',
+	'{assets_path}' => '".MODX_ASSETS_PATH."'
+);
 
-	
+
 function __construct( $config ){
 		$this->config = $config;
 		
@@ -37,6 +39,8 @@ function __construct( $config ){
 	
 	
 	
+// Run the builder
+///------------------------------------------------------------------------------------------------
 public function build() {
 	
 		// ADD CATEGORIES 
@@ -50,12 +54,6 @@ public function build() {
 		$this->_stop_timer();
 	}//
 	
-	
-private function _build_categories(){
-		foreach($this->categories as $category){ 
-			$category->build();	
-		};
-	}//
 	
 	
 	
@@ -73,6 +71,20 @@ public function addDirectory($source,$target){
 		$this->categories[PKG_NAME]->addDirectory($source,$target);
 	}//
 	
+	
+
+//-------------------------------------------------------------------------------------------------
+//---  P R I V A T E   M E T H O D S  -------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
+
+	
+// Build all categories into transport package
+//-------------------------------------------------------------------------------------------------
+private function _build_categories(){
+		foreach($this->categories as $category){ 
+			$category->build();	
+		};
+	}//
 	
 	
 // Define package constants
@@ -98,7 +110,7 @@ private function _stop_timer(){
 		$tend = explode(" ", microtime());
 		$tend = $tend[1] + $tend[0];
 		$totalTime= sprintf("%2.4f s",($tend - $this->startTime));
-		$this->log("<strong>Package Built in {$totalTime}</strong>\n",'DONE');
+		$this->log("<strong>Package $this->pkg_name Built in {$totalTime}</strong>\n",'DONE');
 		echo '</pre></body></html>';
 	}//
 	
@@ -122,8 +134,8 @@ private function _initialize_modx(){
 private function _register_namespace($NAMESPACE){
 		$this->builder->registerNamespace($NAMESPACE,false,true,'{core_path}components/'.$NAMESPACE.'/');
 		
-		$pkg_name = PKG_NAME_LOWER.'-'.PKG_VERSION.'-'.PKG_RELEASE;
-		$this->log('Initialising build ['.$pkg_name.']','INIT');
+		$this->pkg_name = PKG_NAME_LOWER.'-'.PKG_VERSION.'-'.PKG_RELEASE;
+		$this->log('Initialising build ['.$this->pkg_name.']','INIT');
 	}//
 	
 	

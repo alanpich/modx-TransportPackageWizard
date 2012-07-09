@@ -72,6 +72,10 @@ public function addChunk($name, $filePath, $description='', $properties = array(
 	
 	
 public function addDirectory($source,$target){
+		if(!is_dir($source)){
+			$this->wizard->log("Skipping missing Directory [$source",'WARN','orange');
+			return;
+		};
 		$this->directories[] = array('source'=>$source,'target'=>$target);
 	}//
 	
@@ -90,7 +94,7 @@ public function build() {
 		$this->vehicle = $this->wizard->builder->createVehicle($this->modCategory,$this->vehicle_attr);
 		
 		// Add file resolvers
-		$this->_build_directories(&$this->vehicle);
+		$this->_build_directories();
 		
 		$this->wizard->builder->putVehicle($this->vehicle);
 	}//
@@ -121,15 +125,25 @@ private function _build_chunks(){
 	}//
 	
 	
-private function _build_directories( $vehicle ){
+private function _build_directories(  ){
 		if(count($this->directories)<1){return;};
 		$this->wizard->log("  &#8212; Directories:",'');
 		foreach($this->directories as $dir){
-			$vehicle->resolve('file',array(
-				'source' => $dir['source'],
-				'target' => $dir['target']
+			
+			// Prepare SOURCE
+			$source = $dir['source'];
+			
+			// Prepare TARGET
+			$rawTarget = $dir['target'];
+			$target = $rawTarget;
+			$target = str_replace(array_keys($this->wizard->pathShortcuts),$this->wizard->pathShortcuts,$target);
+			$target = 'return "'.$target.'";';
+			
+			$this->vehicle->resolve('file',array(
+				'source' => $source,
+				'target' => $target
 			));
-			$this->wizard->log("    &raquo; ". $dir['source']."\n                      => ".str_replace('return ','',$dir['target']),'');
+			$this->wizard->log("    &raquo; ". $dir['source']."\n                      => ".$rawTarget,'');
 		};
 	}//
 
