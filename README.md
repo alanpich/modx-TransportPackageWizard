@@ -33,8 +33,11 @@ $myCategory->addTemplate('Template-Name',true);
 /** Add Resources to transport (2nd param `true` to include child resources) */
 $Package->addResources(array(1,2,3),true);
 
-/** Set a modx System Setting after install */
+/** Set a new System Setting after install */
 $Package->PostInstall->setOption('key','value','xtype','area','namespace');
+
+/** Update an existing System Setting after install */
+$Package->PostInstall->setOption('key','value');
 
 /** Build the transport package for deployment */
 $Package->build();
