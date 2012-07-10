@@ -11,7 +11,7 @@ $Package = new TransportPackageWizard(array(
 							'PKG_NAME' => 'MWIB',
 							'PKG_NAME_LOWER' => 'mwib',
 							'PKG_VERSION' => '1.2',
-							'PKG_RELEASE' => 'resolver9'
+							'PKG_RELEASE' => 'resolver22'
 						)
 				));
 
@@ -52,7 +52,7 @@ $PL = $Package->addCategory('Page Layout');
 $Package->addDirectory(MODX_ASSETS_PATH.'components/mwib', '{assets_path}components/');
 
 // Add Resources -----------------------------------------------------------------------------
-$Package->addResources(2,3,4,6,77);
+$Package->addResources(array(1,2),true);
  
  
 // Add post-install functions ----------------------------------------------------------------

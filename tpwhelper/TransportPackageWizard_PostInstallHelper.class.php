@@ -3,6 +3,10 @@ class TransportPackageWizard_PostInstallHelper {
 	
 public $isInstall = false;
 public $isUpdate = false;
+public $resTplMap = array();
+public $resAliasMap = array();
+public $resParentMap = array();
+public $resAliasKEY = '';
 	
 function __construct($object,$namespace){
 		global $modx, $options;
@@ -52,6 +56,41 @@ public function setOption($key,$val, $xtype="textfield", $area="", $namespace=""
 			$this->modx->log(modX::LOG_LEVEL_INFO,"Modx Option [$key] created");
 		};
 	}//
-	
+
+
+
+// Restore transported resources to their templates
+//------------------------------------------------------------------------------------------------------
+public function restoreResourceTemplates(){
+		$this->modx->log(modX::LOG_LEVEL_INFO,"Restoring resource/template relationships ");
+		foreach( $this->resTplMap as $alias => $tplName ){
+			$this->modx->log(modX::LOG_LEVEL_INFO,"Tying res [$alias] to tpl[$tplName] ");
+			$res = $this->modx->getObject('modResource',array('alias'=>$alias));
+			$resID = $res->get('id');
+			$tplID = $this->modx->getObject('modTemplate',array('templatename'=>$tplName))->get('id');
+			$res->set('template',$tplID);
+			$this->modx->log(modX::LOG_LEVEL_INFO,"Saving res #$resID to tpl[$tplName] ");
+			$res->save();
+			$this->modx->log(modX::LOG_LEVEL_INFO,"Saved res #$resID to tpl[$tplName] ");
+		};
+	}//
+
+// Restore parental relationships between resources
+//------------------------------------------------------------------------------------------------------
+public function restoreResourceParentalRelationships(){
+		$this->modx->log(modX::LOG_LEVEL_INFO,"Restoring parent/child resource relationships");
+		foreach($this->resParentMap as $resAlias => $parentAlias){
+			if( $parentAlias == $this->resAliasKEY.'-resource-0'){
+				$parentId = 0;
+			} else {
+				$parentRes = $this->modx->getObject('modResource',array('alias'=>$parentAlias));
+				$parentId = $parentRes->get('id');
+			};
+			$res = $this->modx->getObject('modResource',array('alias'=>$resAlias)); 
+			$resId = $res->get('id');
+			$res->set('parent',$parentId);
+			$res->save();
+		};
+	}//
 	
 };// end class TransportPackageWizard_HelperClass

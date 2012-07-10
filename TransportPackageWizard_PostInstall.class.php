@@ -1,6 +1,9 @@
 <?php class TransportPackageWizard_PostInstall {
 	
 public $post_install_script = '';	
+public $resTplMap = array();
+public $resAliasMap = array();
+public $resParentMap = array();
 	
 function __construct($wizard){
 		$this->wizard = $wizard;
@@ -41,11 +44,50 @@ public function setOption($key, $val, $xtype='', $area='', $namespace=''){
 //---  P R I V A T E   M E T H O D S  -------------------------------------------------
 //-------------------------------------------------------------------------------------
 	
+	
+// Maintain a map of ResourceAlias -> TemplateName for resource transport
+//-------------------------------------------------------------------------------------
+public function updateResourceTemplateMap( $res ){
+		$tplID = $res->get('template');
+		$resAlias = $res->get('alias');
+		$templateName = $this->wizard->modx->getObject('modTemplate',$tplID)->get('templatename');
+		
+		// Save the resource alias for later
+		$oldAlias = $resAlias;
+		$newAlias = PKG_NAME_LOWER.'-resource-'.$res->get('id');
+		$this->resAliasMap[$newAlias] = $oldAlias;
+		$res->set('alias',$newAlias);
+		
+		// Save relationship between new alias and template name
+		if(!isset($this->resTplMap[$resAlias])){
+			$this->resTplMap[$newAlias] = $templateName;
+		};		
+	}//
+	
+// Maintain a map of Resource parents to the parent's new alias
+//-------------------------------------------------------------------------------------
+public function updateResourceParentMap( $res ){
+		$alias = $res->get('alias');
+		$parentAlias = PKG_NAME_LOWER.'-resource-'.$res->get('parent');
+		$this->resParentMap[$alias] = $parentAlias;
+	}//
+	
 // Build resolver script and add to vehicle
 //-------------------------------------------------------------------------------------
 public function _build(){
+		
+		// Add res/tpl map
+		$this->_add('$HLPR->resTplMap = json_decode(\''.json_encode($this->resTplMap).'\');');
+		$this->_add('$HLPR->resAliasMap = json_decode(\''.json_encode($this->resAliasMap).'\');');
+		$this->_add('$HLPR->resParentMap = json_decode(\''.json_encode($this->resParentMap).'\');');
+		$this->_add('$HLPR->resAliasKEY = "'.PKG_NAME_LOWER.'";');
+		$this->_add('$HLPR->restoreResourceParentalRelationships();');
+		$this->_add('$HLPR->restoreResourceTemplates();');
+		
 		// Add final return
 		$this->_add('return true;');
+		
+		
 		// Add to root category vehicle
 		$this->wizard->categories[PKG_NAME]->resolverScript = $this->post_install_script;
 	}//

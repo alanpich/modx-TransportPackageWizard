@@ -140,6 +140,12 @@ public function addResource( $resID ){
 			$this->wizard->warn("Skipping missing Resource [#$resID]");
 			return;
 		};
+		
+		// Update resource->alias / template name map
+		$this->wizard->PostInstall->updateResourceTemplateMap(&$res);
+		// Maintain parental relationship map
+		$this->wizard->PostInstall->updateResourceParentMap(&$res);
+		
 		$this->resources[] = $res;
 	}//
 	

@@ -25,8 +25,13 @@ $myCategory = $Package->addCategory('My Category Name');
 /** Add Elements to the category */
 $myCategory->addSnippet('Snippet-Name');
 $myCategory->addChunk('Chunk-Name');
-$myCategory->addTemplate('Template-Name',true);
 $myCategory->addTV('TV-Name');
+
+/** Add Template to category (2nd param `true` to include all associated TVs) */
+$myCategory->addTemplate('Template-Name',true);
+
+/** Add Resources to transport (2nd param `true` to include child resources) */
+$Package->addResources(array(1,2,3),true);
 
 /** Set a modx System Setting after install */
 $Package->PostInstall->setOption('key','value','xtype','area','namespace');
