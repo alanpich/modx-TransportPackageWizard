@@ -1,6 +1,7 @@
 <?php 
 define('DEFINE','DEFINE');
 require_once dirname(__FILE__).'/TransportPackageWizard_Category.class.php';
+require_once dirname(__FILE__).'/TransportPackageWizard_PostInstall.class.php';
 
 // Transport Package Wizard Class
 //-------------------------------------------------------------------------------------------------
@@ -13,10 +14,13 @@ public $pathShortcuts = array(
 		'{core_path}' => '".MODX_CORE_PATH."',
 		'{assets_path}' => '".MODX_ASSETS_PATH."'
 	);
+public $PostInstall;
 
 
 function __construct( $config ){
 		$this->config = $config;
+		
+		$this->PostInstall = new TransportPackageWizard_PostInstall(&$this);
 		
 		// Define all nescesary definables
 		$this->_define_constants();
@@ -30,8 +34,8 @@ function __construct( $config ){
 		// Create a namespace for this extra
 		$this->_register_namespace(PKG_NAME_LOWER);
 		
-		// Create an initial category
-		$this->addCategory(PKG_NAME);
+		// Set up initial requirements
+		$this->requiredSetup();
 	}//
 	
 	
@@ -72,10 +76,25 @@ public function addDirectory($source,$target){
 	
 
 
+public function getPostInstallScript(){
+		return $this->PostInstall->post_install_script;
+	}//
+
 
 //-------------------------------------------------------------------------------------------------
 //---  P R I V A T E   M E T H O D S  -------------------------------------------------------------
 //-------------------------------------------------------------------------------------------------
+
+
+// Do all required setup shiznit (for PostInstallHelper etc)
+//-------------------------------------------------------------------------------------------------
+private function requiredSetup(){
+		// Create a root category for this extra
+		$this->addCategory(PKG_NAME);
+		
+		// Include tpw helper classes in transport
+		$this->addDirectory(dirname(__FILE__).'/tpwhelper','{core_path}components/');
+	}//
 
 	
 // Build all categories into transport package
@@ -112,7 +131,8 @@ private function _stop_timer(){
 		$tend = explode(" ", microtime());
 		$tend = $tend[1] + $tend[0];
 		$totalTime= sprintf("%2.4f s",($tend - $this->startTime));
-		$this->log("<strong>Package $this->pkg_name Built in {$totalTime}</strong>\n",'DONE');
+		$this->log("<strong>Package $this->pkg_name Built in {$totalTime}</strong>",'DONE');
+		$this->log("Download package ".$this->_getDownloadLink(),'LINK');
 		echo '</pre></body></html>';
 	}//
 	
@@ -142,6 +162,14 @@ private function _register_namespace($NAMESPACE){
 	}//
 	
 	
+// Get a download link for the created package
+//-------------------------------------------------------------------------------------------------
+private function _getDownloadLink(){
+		$link = $this->modx->getOption('site_url')."core/packages/$this->pkg_name.transport.zip";
+		return '<a href="'.$link.'">here</a>';
+	}//
+	
+	
 // Output to browser (todo - make able to run in shell/bash as CLI script)
 //-------------------------------------------------------------------------------------------------
 public function log($msg, $key='LOG',$color='#5F9EA0'){
@@ -150,7 +178,11 @@ public function log($msg, $key='LOG',$color='#5F9EA0'){
 		echo '<span style="font-weight:bold; color:'.$color.';">'.$key.'</span> '.$msg."\n";
 	}//
 
-	
+// Shortcut to log($msg,'WARN','orange')
+//-------------------------------------------------------------------------------------------------
+public function warn($msg){
+		$this->log($msg, $key='WARN',$color='orange');
+	}//
 	
 };// end class TransportPackageWizard
 

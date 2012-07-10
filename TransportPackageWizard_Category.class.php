@@ -15,6 +15,16 @@ public $vehicle_attr = array(
             xPDOTransport::PRESERVE_KEYS => false,
             xPDOTransport::UPDATE_OBJECT => true,
             xPDOTransport::UNIQUE_KEY => 'name',
+        ),
+        'Templates' => array(
+            xPDOTransport::PRESERVE_KEYS => false,
+            xPDOTransport::UPDATE_OBJECT => true,
+            xPDOTransport::UNIQUE_KEY => 'templatename',
+        ),
+        'TemplateVars' => array(
+            xPDOTransport::PRESERVE_KEYS => false,
+            xPDOTransport::UPDATE_OBJECT => true,
+            xPDOTransport::UNIQUE_KEY => 'name',
         )
     ),
 );
@@ -22,6 +32,8 @@ public $vehicle_attr = array(
 public $snippets = array();
 public $chunks = array();
 public $directories = array();
+public $templates = array();
+public $tvs = array();
 
 	
 function __construct( $name, $wizard ){
@@ -33,11 +45,13 @@ function __construct( $name, $wizard ){
 	}//
 	
 
-// Add a snippet to this category	
+// Add a snippet to this category
+//	- If only snippet name is specified then will attempt to load from MODX	
 //-------------------------------------------------------------------------------------------------
-public function addSnippet( $name, $filePath, $description = '', $properties = array() ) {
+public function addSnippet( $name, $filePath = false, $description = '', $properties = array() ) {
+		if(!$filePath){	return $this->_addFromSnippet($name); };
 		if(!file_exists($filePath)){
-			$this->wizard->log("Skipping missing Snippet [$filePath]",'WARN','orange');
+			$this->wizard->warn("Skipping missing Snippet [$filePath]");
 			return;
 		};
 		$snippet = $this->wizard->modx->newObject('modSnippet');
@@ -53,10 +67,12 @@ public function addSnippet( $name, $filePath, $description = '', $properties = a
 	
 	
 // Add a chunk to this category	
+//	- If only chunk name is specified then will attempt to load from MODX	
 //-------------------------------------------------------------------------------------------------
-public function addChunk($name, $filePath, $description='', $properties = array() ){
+public function addChunk($name, $filePath = false, $description='', $properties = array() ){
+		if(!$filePath){	return $this->_addFromChunk($name); };
 		if(!file_exists($filePath)){
-			$this->wizard->log("Skipping missing Chunk [$filePath]",'WARN','orange');
+			$this->wizard->warn("Skipping missing Chunk [$filePath]");
 			return;
 		};
 		$chunk = $this->wizard->modx->newObject('modChunk');
@@ -70,14 +86,33 @@ public function addChunk($name, $filePath, $description='', $properties = array(
 		$this->chunks[] = $chunk;
 	}//
 
+
+// Add a template to this category	
+//	- pass true as second param to add all associated TVs	
+//-------------------------------------------------------------------------------------------------
+public function addTemplate($name, $addAssociatedTVs = false ){
+		$this->_addFromTemplate($name);
+		if($addAssociatedTVs){
+			$this->_associateAllTVsForTemplate($name);
+		};
+	}//
+
+
+// Add a Template Variable to this category	
+//-------------------------------------------------------------------------------------------------
+public function addTV($name){
+		$this->_addFromTV($name);
+	}//
+
 	
 // Add a directory to this category	 [ Use TransportPackageWizard::addDirectory() instead ]
 //-------------------------------------------------------------------------------------------------
-public function addDirectory($source,$target){
+public function addDirectory( $source, $target ){
 		if(!is_dir($source)){
-			$this->wizard->log("Skipping missing Directory [$source",'WARN','orange');
+			$this->wizard->warn("Skipping missing Directory [$source]");
 			return;
 		};
+
 		$this->directories[] = array('source'=>$source,'target'=>$target);
 	}//
 	
@@ -88,7 +123,74 @@ public function addDirectory($source,$target){
 //---  D O N T   U S E   T H E S E   F U N C T I O N S   D I R E C T L Y  -------------------------
 //-------------------------------------------------------------------------------------------------
 	
-
+	
+	
+// Adds a snippet from the current modx installation
+//-------------------------------------------------------------------------------------------------
+private function _addFromSnippet($name){
+		$identifier = is_int($name)? $name : array( 'name' => $name);
+		$snippet = $this->wizard->modx->getObject('modSnippet',$identifier);
+		if(!$snippet instanceof modSnippet){
+			$this->wizard->warn("Skipping nonexistant snippet [$name]");
+			return;
+		};
+		$this->snippets[] = $snippet;
+	}//
+	
+	
+// Adds a snippet from the current modx installation
+//-------------------------------------------------------------------------------------------------
+private function _addFromChunk($name){
+		$identifier = is_int($name)? $name : array( 'name' => $name);
+		$chunk = $this->wizard->modx->getObject('modChunk',$identifier);
+		if(!$chunk instanceof modChunk){
+			$this->wizard->warn("Skipping nonexistant chunk [$name]");
+			return;
+		};
+		$this->chunks[] = $chunk;
+	}//
+	
+	
+// Adds a template from the current modx installation
+//-------------------------------------------------------------------------------------------------
+private function _addFromTemplate($name){
+		$identifier = is_int($name)? $name : array( 'templatename' => $name);
+		$template = $this->wizard->modx->getObject('modTemplate',$identifier);
+		if(!$template instanceof modTemplate){
+			$this->wizard->warn("Skipping nonexistant template [$name]");
+			return;
+		};
+		$this->templates[] = $template;
+	}//
+	
+	
+// Adds a template variable from the current modx installation
+//-------------------------------------------------------------------------------------------------
+private function _addFromTV($name){
+		$identifier = is_int($name)? $name : array( 'name' => $name);
+		$tv = $this->wizard->modx->getObject('modTemplateVar',$identifier);
+		if(!$tv instanceof modTemplateVar){
+			$this->wizard->warn("Skipping nonexistant TV [$name]");
+			return;
+		};
+		$this->tvs[] = $tv;
+	}//
+	
+	
+// Adds post-install resolvers to associate all TVs with template $name
+//-------------------------------------------------------------------------------------------------
+private function _associateAllTVsForTemplate($name){
+		$identifier = is_int($name)? $name : array( 'templatename' => $name);
+		$tpl = $this->wizard->modx->getObject('modTemplate',$identifier);
+		$tvs = $tpl->getTemplateVars();
+		foreach($tvs as $tv){
+			$tvName = $tv->get('name');
+			$this->wizard->PostInstall->addTVtoTemplate($tvName,$name);
+		};
+	}//
+	
+	
+	
 // Build the transport vehicle for this category
 //-------------------------------------------------------------------------------------------------
 public function build() {
@@ -98,6 +200,8 @@ public function build() {
 		// Add snippets
 		$this->_build_snippets();
 		$this->_build_chunks();
+		$this->_build_templates();
+		$this->_build_tvs();
 	
 		// Build vehicle and add to transport package
 		$this->vehicle = $this->wizard->builder->createVehicle($this->modCategory,$this->vehicle_attr);
@@ -135,6 +239,32 @@ private function _build_chunks(){
 			$description = $chunk->get('description');
 			$description = empty($description) ? '' : "~ <em>$description</em>";
 			$this->wizard->log("    &raquo; $name $description",'');
+		};
+	}//
+	
+	
+// Build Templates for transport
+//-------------------------------------------------------------------------------------------------	
+private function _build_templates(){
+		if(count($this->templates)<1){return;};
+		$this->modCategory->addMany($this->templates);
+		$this->wizard->log("  &#8212; Templates:",'');
+		foreach($this->templates as $template) {
+			$name = $template->get('templatename');
+			$this->wizard->log("    &raquo; $name",'');
+		};
+	}//
+	
+	
+// Build TVs for transport
+//-------------------------------------------------------------------------------------------------	
+private function _build_tvs(){
+		if(count($this->tvs)<1){return;};
+		$this->modCategory->addMany($this->tvs);
+		$this->wizard->log("  &#8212; Template Variables:",'');
+		foreach($this->tvs as $tv) {
+			$name = $tv->get('name');
+			$this->wizard->log("    &raquo; $name",'');
 		};
 	}//
 	
