@@ -34,6 +34,7 @@ public $chunks = array();
 public $directories = array();
 public $templates = array();
 public $tvs = array();
+public $resolverScript = '';
 
 	
 function __construct( $name, $wizard ){
@@ -206,6 +207,9 @@ public function build() {
 		// Build vehicle and add to transport package
 		$this->vehicle = $this->wizard->builder->createVehicle($this->modCategory,$this->vehicle_attr);
 		
+		// Add script resolver (if one is set)
+		$this->_build_post_install_script();
+		
 		// Add file resolvers
 		$this->_build_directories();
 		
@@ -266,6 +270,27 @@ private function _build_tvs(){
 			$name = $tv->get('name');
 			$this->wizard->log("    &raquo; $name",'');
 		};
+	}//
+
+
+// Build Directories for transport
+//-------------------------------------------------------------------------------------------------	
+private function _build_post_install_script(  ){
+		if(empty($this->resolverScript)){return;};
+		
+		// write script to temp file
+		$fh = fopen('transport.install.script.php','w+');
+		fwrite($fh,$this->resolverScript);
+		fclose($fh);
+		
+		// Add file to vehicle as php resolver
+		$this->vehicle->resolve('php',array(
+				'source' => 'transport.install.script.php'
+			));
+			
+		// Log
+		$this->wizard->log("  &#8212; Install Script added",'');
+					
 	}//
 	
 	

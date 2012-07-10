@@ -20,7 +20,6 @@ public $PostInstall;
 function __construct( $config ){
 		$this->config = $config;
 		
-		$this->PostInstall = new TransportPackageWizard_PostInstall(&$this);
 		
 		// Define all nescesary definables
 		$this->_define_constants();
@@ -46,8 +45,12 @@ function __construct( $config ){
 //-------------------------------------------------------------------------------------------------
 public function build() {
 	
+		// ADD POST INSTALL RESOLVER
+		$this->PostInstall->_build();
+		
 		// ADD CATEGORIES 
 		$this->_build_categories();
+		
 		
 		// BUILD & ZIP UP TRANSPORT PACKAGE 
 		$this->log('Packing up transport package zip...');
@@ -100,6 +103,10 @@ private function requiredSetup(){
 // Build all categories into transport package
 //-------------------------------------------------------------------------------------------------
 private function _build_categories(){
+		// Move root category to end of stack to install it last
+		$rootCat = array_shift($this->categories);
+		array_push($this->categories,$rootCat);
+		
 		foreach($this->categories as $category){ 
 			$category->build();	
 		};
@@ -133,6 +140,11 @@ private function _stop_timer(){
 		$totalTime= sprintf("%2.4f s",($tend - $this->startTime));
 		$this->log("<strong>Package $this->pkg_name Built in {$totalTime}</strong>",'DONE');
 		$this->log("Download package ".$this->_getDownloadLink(),'LINK');
+		
+		// Delete transport resolver script file if exists
+		if( file_exists('transport.install.script.php')){
+			unlink('transport.install.script.php');
+		};
 		echo '</pre></body></html>';
 	}//
 	
@@ -155,10 +167,14 @@ private function _initialize_modx(){
 // Create a namespace for this extra
 //-------------------------------------------------------------------------------------------------
 private function _register_namespace($NAMESPACE){
+		$this->namespace = $NAMESPACE;
 		$this->builder->registerNamespace($NAMESPACE,false,true,'{core_path}components/'.$NAMESPACE.'/');
 		
 		$this->pkg_name = PKG_NAME_LOWER.'-'.PKG_VERSION.'-'.PKG_RELEASE;
 		$this->log('Initialising build ['.$this->pkg_name.']','INIT');
+
+		$this->PostInstall = new TransportPackageWizard_PostInstall(&$this);
+
 	}//
 	
 	
@@ -183,6 +199,14 @@ public function log($msg, $key='LOG',$color='#5F9EA0'){
 public function warn($msg){
 		$this->log($msg, $key='WARN',$color='orange');
 	}//
+	
+	
+// Shortcut to log($msg,'ERROR','#c00')
+//-------------------------------------------------------------------------------------------------
+public function error($msg){
+		$this->log($msg, $key='ERROR',$color='#c00');
+	}//
+	
 	
 };// end class TransportPackageWizard
 

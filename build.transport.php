@@ -10,8 +10,8 @@ $Package = new TransportPackageWizard(array(
 							'MODX_ASSETS_PATH' => dirname(dirname(__FILE__)).'/assets/',
 							'PKG_NAME' => 'MWIB',
 							'PKG_NAME_LOWER' => 'mwib',
-							'PKG_VERSION' => '1.1',
-							'PKG_RELEASE' => 'alan3'
+							'PKG_VERSION' => '1.2',
+							'PKG_RELEASE' => 'resolver7'
 						)
 				));
 
@@ -52,15 +52,15 @@ $PL = $Package->addCategory('Page Layout');
 $Package->addDirectory(MODX_ASSETS_PATH.'components/mwib', '{assets_path}components/');
  
  
- 
- 
+// Add post-install functions ----------------------------------------------------------------
+$Package->PostInstall->setOption('mwib.createdSetting','Alan made this','textfield','core');
  
  
 // Build the transport package for deployments -----------------------------------------------
 $Package->build();
 
 
-echo "<pre>POST INSTALL SCRIPT\n---------------\n".$Package->getPostInstallScript()."</pre>";
+echo "<pre>POST INSTALL SCRIPT\n---------------\n".str_replace('<?php','&lt;?php',$Package->getPostInstallScript())."</pre>";
 
 
 
