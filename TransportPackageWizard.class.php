@@ -77,6 +77,29 @@ public function addDirectory($source,$target){
 		$this->categories[PKG_NAME]->addDirectory($source,$target);
 	}//
 	
+// Add one or many resources for transport
+//-------------------------------------------------------------------------------------------------
+public function addResources($IDs,$includeChildren=false){
+		if(!is_array($IDs) && !is_integer($IDs)){
+			$this->warn('Bad resource identifier, should be integer or array');
+			return;
+		};
+		if(!is_array($IDs)){ $IDs = array($IDs); };
+		
+		$allIDs = $IDs;
+		if($includeChildren){
+			foreach($IDs as $ID){
+				$allIDs = array_merge($allIDs,$this->getResourceTree($ID));
+			};
+		}
+		
+		$allIDs = array_unique($allIDs);
+
+		foreach($allIDs as $resID){
+			$this->categories[PKG_NAME]->addResource($resID);
+		};
+	}//
+	
 
 
 public function getPostInstallScript(){
@@ -205,6 +228,19 @@ public function warn($msg){
 //-------------------------------------------------------------------------------------------------
 public function error($msg){
 		$this->log($msg, $key='ERROR',$color='#c00');
+	}//
+	
+	
+	
+private function getResourceTree($ID){
+		$id_array = array($ID);
+		$kids = $this->modx->getObject('modResource',$ID)->getMany('Children');
+		foreach($kids as $kid){
+			$id = $kid->get('id');
+			$kidKids = $this->getResourceTree($kid->get('id'));
+			$id_array = array_merge($id_array,$kidKids);
+		};
+		return $id_array;
 	}//
 	
 	

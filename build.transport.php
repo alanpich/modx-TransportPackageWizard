@@ -11,7 +11,7 @@ $Package = new TransportPackageWizard(array(
 							'PKG_NAME' => 'MWIB',
 							'PKG_NAME_LOWER' => 'mwib',
 							'PKG_VERSION' => '1.2',
-							'PKG_RELEASE' => 'resolver7'
+							'PKG_RELEASE' => 'resolver9'
 						)
 				));
 
@@ -50,10 +50,13 @@ $PL = $Package->addCategory('Page Layout');
 	  	   
 // Add Files ---------------------------------------------------------------------------------
 $Package->addDirectory(MODX_ASSETS_PATH.'components/mwib', '{assets_path}components/');
+
+// Add Resources -----------------------------------------------------------------------------
+$Package->addResources(2,3,4,6,77);
  
  
 // Add post-install functions ----------------------------------------------------------------
-$Package->PostInstall->setOption('mwib.createdSetting','Alan made this','textfield','core');
+$Package->PostInstall->setOption('mwib.createdSetting','Alan edited this','textfield','core');
  
  
 // Build the transport package for deployments -----------------------------------------------

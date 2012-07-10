@@ -26,7 +26,20 @@ public $vehicle_attr = array(
             xPDOTransport::UPDATE_OBJECT => true,
             xPDOTransport::UNIQUE_KEY => 'name',
         )
-    ),
+    )
+);
+public $resource_attr = array(
+    xPDOTransport::UNIQUE_KEY => 'id',
+    xPDOTransport::PRESERVE_KEYS => false,
+    xPDOTransport::UPDATE_OBJECT => true,
+    xPDOTransport::RELATED_OBJECTS => true,
+    xPDOTransport::RELATED_OBJECT_ATTRIBUTES => array (
+        'TemplateVars' => array(
+            xPDOTransport::PRESERVE_KEYS => false,
+            xPDOTransport::UPDATE_OBJECT => true,
+            xPDOTransport::UNIQUE_KEY => 'name',
+        )
+    )
 );
 
 public $snippets = array();
@@ -35,6 +48,7 @@ public $directories = array();
 public $templates = array();
 public $tvs = array();
 public $resolverScript = '';
+public $resources = array();
 
 	
 function __construct( $name, $wizard ){
@@ -117,6 +131,20 @@ public function addDirectory( $source, $target ){
 		$this->directories[] = array('source'=>$source,'target'=>$target);
 	}//
 	
+	
+// Add a resource to the vehicle	 [ Use TransportPackageWizard::addResources() instead ]
+//-------------------------------------------------------------------------------------------------
+public function addResource( $resID ){
+		$res = $this->wizard->modx->getObject('modResource',$resID);
+		if(! $res instanceOf modResource ){
+			$this->wizard->warn("Skipping missing Resource [#$resID]");
+			return;
+		};
+		$this->resources[] = $res;
+	}//
+	
+	
+
 
 	
 	
@@ -203,6 +231,7 @@ public function build() {
 		$this->_build_chunks();
 		$this->_build_templates();
 		$this->_build_tvs();
+		$this->_build_resources();
 	
 		// Build vehicle and add to transport package
 		$this->vehicle = $this->wizard->builder->createVehicle($this->modCategory,$this->vehicle_attr);
@@ -268,6 +297,23 @@ private function _build_tvs(){
 		$this->wizard->log("  &#8212; Template Variables:",'');
 		foreach($this->tvs as $tv) {
 			$name = $tv->get('name');
+			$this->wizard->log("    &raquo; $name",'');
+		};
+	}//
+
+
+// Build Resources for transport
+//-------------------------------------------------------------------------------------------------	
+private function _build_resources(){
+		
+		if(count($this->resources)<1){return;};
+		
+		
+		$this->wizard->log("  &#8212; Resources:",'');
+		foreach($this->resources as $res) {
+			$vehicle = $this->wizard->builder->createVehicle($res,$this->resource_attr);
+			$this->wizard->builder->putVehicle($vehicle);
+			$name = $res->get('pagetitle');
 			$this->wizard->log("    &raquo; $name",'');
 		};
 	}//
