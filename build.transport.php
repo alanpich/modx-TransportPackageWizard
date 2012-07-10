@@ -1,6 +1,9 @@
 <?php
 
+// Include the Library files --------------------------------------------------------------------------------------------------------------------
 require_once 'TransportPackageWizard.class.php';
+
+// Create an instance of the Transport Wizard ---------------------------------------------------------------------------------------------------
 $Package = new TransportPackageWizard(array(
 					DEFINE => array(
 							'MODX_CORE_PATH' => dirname(dirname(__FILE__)).'/core/',
@@ -12,26 +15,18 @@ $Package = new TransportPackageWizard(array(
 						)
 				));
 
-
-<<<<<<< HEAD
-// CATEGORY:  Google Analytics
-$Security = $Pachage->addCategory('Security');
-
-// Add Category 'Test Category' -----------------------------------------------------------------------------------------------------------------
-$Test_Category = $Package->addCategory('Test Category'); 
-=======
-
 // Add Category 'Test Category' -----------------------------------------------------------------------------------------------------------------
 $myCategory = $Package->addCategory('My Category'); 
->>>>>>> Tidy up code
-	$Test_Category->addSnippet('Test-Snippet',MODX_BASE_PATH.'_build/test.snippet.php');
-	$Test_Category->addChunk('Alans-Test-Chunk',dirname(__FILE__).'/chunk.inc.html','A demo chunk inserted into the category `Test Category`');
+
+// Add Elements to Category ---------------------------------------------------------------------------------------------------------------------
+$myCategory->addSnippet('Test-Snippet',MODX_BASE_PATH.'_build/test.snippet.php');
+$myCategory->addChunk('Alans-Test-Chunk',dirname(__FILE__).'/chunk.inc.html','A demo chunk inserted into the category `Test Category`');
  
  
 // Add Files ------------------------------------------------------------------------------------------------------------------------------------
 $Package->addDirectory(MODX_ASSETS_PATH.'components/mwib', '{assets_path}components/mwib/uploaded/');
  
-  
+// Build the transport package for deployments --------------------------------------------------------------------------------------------------  
 $Package->build();
 exit();
 
