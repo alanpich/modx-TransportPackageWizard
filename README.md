@@ -1,8 +1,12 @@
 #Modx Transport Package Wizard#
 ###An easier way to create Transport Packages for Modx 2.2+###
 --------------------------------------------------------------
-An ongoing project to create an easy-to-use library for transport package creation in modx.
-Very basic at this point, usage is outlined below
+This project aims to create an easy-to-use library API for the Modx xPDO modPackageBuilder. While it will never be
+as powerful as the natice packager, it's focus is on rapid deployment; putting together a package of various 
+native elements for transport in a few lines of code rather than spending time debugging a low-level build script.
+
+If you are looking for a gui-based package builder, check out [PackMan](http://modx.com/extras/package/packman)
+
 
 ```php
 <?php
