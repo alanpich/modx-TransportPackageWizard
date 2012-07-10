@@ -4,7 +4,8 @@
 An ongoing project to create an easy-to-use library for transport package creation in modx.
 Very basic at this point, usage is outlined below
 
-```ruby
+```php
+<?php
 /** Initialise the Wizard class */
 $Package = new TransportPackageWizard(array(
   				DEFINE => array(
