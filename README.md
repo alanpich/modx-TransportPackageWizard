@@ -13,8 +13,7 @@ $Package = new TransportPackageWizard(array(
 							'PKG_NAME_LOWER' => 'mypackagename',
 							'PKG_VERSION' => '1.0',
 							'PKG_RELEASE' => 'beta1'
-						),
-					'root' =>  dirname(dirname(__FILE__)).'/'
+						)
 				));
 
 /** Add files & directories to package */
@@ -24,8 +23,13 @@ $Package->addDirectory('path/to/directory', "{assets_path}components/mypackagena
 $myCategory = $Package->addCategory('My Category Name'); 
 
 /** Add Elements to the category */
-$myCategory->addSnippet('Snippet-Name','path/to/snippet.file.php');
-$myCategory->addChunk('Chunk-Name','path/to/snippet.file.php','Element description is optional');
+$myCategory->addSnippet('Snippet-Name');
+$myCategory->addChunk('Chunk-Name');
+$myCategory->addTemplate('Template-Name',true);
+$myCategory->addTV('TV-Name');
+
+/** Set a modx System Setting after install */
+$Package->PostInstall->setOption('key','value','xtype','area','namespace');
 
 /** Build the transport package for deployment */
 $Package->build();
