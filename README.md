@@ -6,7 +6,7 @@ Very basic at this point, usage is outlined below
 
 ```php
 <?php
-/** Initialise the Wizard class */
+/* Initialise the Wizard class */
 $Package = new TransportPackageWizard(array(
   				DEFINE => array(
 							'MODX_CORE_PATH' => dirname(dirname(__FILE__)).'/core/',
@@ -17,30 +17,30 @@ $Package = new TransportPackageWizard(array(
 						)
 				));
 
-/** Add files & directories to package */
+/* Add files & directories to package */
 $Package->addDirectory('path/to/directory', "{assets_path}components/mypackagename/");
 
-/** Create a Category element */
+/* Create a Category element */
 $myCategory = $Package->addCategory('My Category Name'); 
 
-/** Add Elements to the category */
+/* Add Elements to the category */
 $myCategory->addSnippet('Snippet-Name');
 $myCategory->addChunk('Chunk-Name');
 $myCategory->addTV('TV-Name');
 
-/** Add Template to category (2nd param `true` to include all associated TVs) */
+/* Add Template to category (2nd param `true` to include all associated TVs) */
 $myCategory->addTemplate('Template-Name',true);
 
-/** Add Resources to transport (2nd param `true` to include child resources) */
+/* Add Resources to transport (2nd param `true` to include child resources) */
 $Package->addResources(array(1,2,3),true);
 
-/** Set a new System Setting after install */
+/* Set a new System Setting after install */
 $Package->PostInstall->setOption('key','value','xtype','area','namespace');
 
-/** Update an existing System Setting after install */
+/* Update an existing System Setting after install */
 $Package->PostInstall->setOption('key','value');
 
-/** Build the transport package for deployment */
+/* Build the transport package for deployment */
 $Package->build();
 
 ```
